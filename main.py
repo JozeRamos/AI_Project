@@ -3,7 +3,7 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 
-from FileReader import FileReader
+from file_reader import FileReader
 
 
 def print_hi(name):
@@ -13,9 +13,7 @@ def print_hi(name):
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    a = FileReader.getEstablishments()
-    print(a[0])
-    print(a[1])
-    #FileReader.getDistances()
+    a = FileReader.get_establishments()
+    print(FileReader.get_distances()[0:2])
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/
