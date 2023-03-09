@@ -13,7 +13,7 @@ def print_hi(name):
     print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
 
 def waitingTime(car_time, opening_hours):
-        a = math.ceil(car_time/3600*24)
+        a = math.ceil(car_time/3600)
         b = 0
         start_index = len(opening_hours) - len(opening_hours[a:])
         for i in range(start_index, len(opening_hours)-1):
