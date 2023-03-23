@@ -88,33 +88,66 @@ def getBestNeighbour(neighbours,est,dis):
     return bestNeighbour, bestRouteTime
 
 def hillClimb(cars, est, dis):
-    randomSolution(cars,est, dis)
+    #randomSolution(cars,est, dis)
+    greedy(cars,est,dis)
+    # b = cars[0].time
+    # for car in cars:
+    #     print(car.route)
+    #     print(car.time/3600-9)
+    #     if car.time > b:
+    #         b = car.time
+    #     #print(car.id)
+    # print(b/3600-9)
+    # print("-----------------------------")
+
     for car in cars:
         neighbours = getNeighbours(car.route)
         bestNeighbour, bestNeighbourRouteTime = getBestNeighbour(neighbours,est,dis)
-        #print(car.time/3600)
-        #for i in range(700):        
-        for x in range(700):
+        #print(car.time/3600)   
+        #while bestNeighbourRouteTime < car.time:
+        for i in range(700):     
             car.route = bestNeighbour
             car.time = bestNeighbourRouteTime
             neighbours = getNeighbours(car.route)
             bestNeighbour, bestNeighbourRouteTime = getBestNeighbour(neighbours,est,dis)
             #print(car.time/3600)
         #print("-------------------------")
-    b = 0
-    for car in cars:
-        if car.time > b:
-            b = car.time
+    #b = 0
+    #for car in cars:
+    #    if car.time > b:
+    #        b = car.time
     #print(b/3600)
     return
-        
+
+def greedy(cars,establishments,distances):
+    for i in range(11):
+        for car in cars:   
+            min_time = sys.maxsize
+            flag = False
+            for estab in establishments:               
+                if estab.visited or (estab.id == car.place): continue
+                time = float(estab.inspec_duration) + float(distances[car.place][int(estab.id)]) + waitingTime(car.time + float(distances[car.place][int(estab.id)]), estab.opening_hours)
+                if(time < min_time):
+                     min_time = round(time,2)
+                     next_hop = estab
+                     flag = True
+            if not flag:
+                 continue
+            #print(f'car with id {car.id} in place {car.place} going to {next_hop.id} with {min_time} second, or {round(min_time/3600,2)}h with fulltime {car.time/3600}')
+            car.place = next_hop.id
+
+            next_hop.visited = True
+            car.time = min_time + car.time
+            car.route.append(next_hop.id)
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     establishments = FileReader.get_establishments()
     distances = FileReader.get_distances()
-
     cars = [Car(x) for x in range(100)]
+
     hillClimb(cars,establishments, distances)
+    
     b = cars[0].time
     for car in cars:
         print(car.route)
