@@ -26,7 +26,7 @@ def waitingTime(car_time, opening_hours):
     for i in range(0, start_index-1):
         if opening_hours[i] == 1:
             return (i + next_day)*3600
-    return 0
+    return INF
 
 def randomSolution(cars, est, distances):
     cities = list(range(len(est)))
