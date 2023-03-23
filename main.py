@@ -16,17 +16,17 @@ def print_hi(name):
 
 def waitingTime(car_time, opening_hours):
     a = math.ceil(car_time/3600)
-    if a > 23:
+    while a > 23:
         a -= 24
-    b = 0
-    start_index = len(opening_hours) - len(opening_hours[a:])
-    for i in range(start_index, len(opening_hours)-1):
+    start_index = 23 - len(opening_hours[a:])
+    next_day = len(opening_hours[a:])
+    for i in range(start_index, 23):
         if opening_hours[i] == 1:
             return (i - start_index)*3600
-    for i in range(b, len(opening_hours)-1):
+    for i in range(0, start_index-1):
         if opening_hours[i] == 1:
-            return (i + start_index)*3600 + 3600 * 24 - a * 60
-    return INF
+            return (i + next_day)*3600
+    return 0
 
 def randomSolution(cars, est, distances):
     cities = list(range(len(est)))
@@ -52,7 +52,6 @@ def randomSolution(cars, est, distances):
 
 def routeTime(solution,est,distances):
     routeTime = 0
-    solution.insert(0,0)
     for k in range(len(solution)-1):
         a = solution[k]
         i = solution[k+1]
@@ -93,19 +92,20 @@ def hillClimb(cars, est, dis):
     for car in cars:
         neighbours = getNeighbours(car.route)
         bestNeighbour, bestNeighbourRouteTime = getBestNeighbour(neighbours,est,dis)
-        print(car.time/3600)
-        while bestNeighbourRouteTime < car.time:
+        #print(car.time/3600)
+        #for i in range(700):        
+        for x in range(700):
             car.route = bestNeighbour
             car.time = bestNeighbourRouteTime
             neighbours = getNeighbours(car.route)
             bestNeighbour, bestNeighbourRouteTime = getBestNeighbour(neighbours,est,dis)
-            print(car.time/3600)
-        print("-------------------------")
+            #print(car.time/3600)
+        #print("-------------------------")
     b = 0
     for car in cars:
         if car.time > b:
             b = car.time
-    print(b/3600)
+    #print(b/3600)
     return
         
 # Press the green button in the gutter to run the script.
@@ -115,4 +115,12 @@ if __name__ == '__main__':
 
     cars = [Car(x) for x in range(100)]
     hillClimb(cars,establishments, distances)
+    b = cars[0].time
+    for car in cars:
+        print(car.route)
+        print(car.time/3600-9)
+        if car.time > b:
+            b = car.time
+        #print(car.id)
+    print(b/3600-9)
     

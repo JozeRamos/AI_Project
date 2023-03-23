@@ -3,5 +3,5 @@ class Car:
         self.id = id
         self.route = []
         self.place = 0
-        self.time = 0
+        self.time = 9 * 3600
 
