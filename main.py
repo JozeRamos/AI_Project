@@ -105,9 +105,10 @@ def hillClimb(cars, est, dis):
         bestNeighbour, bestNeighbourRouteTime = getBestNeighbour(neighbours,est,dis)
         #print(car.time/3600)   
         #while bestNeighbourRouteTime < car.time:
-        for i in range(700):     
-            car.route = bestNeighbour
-            car.time = bestNeighbourRouteTime
+        for i in range(700):
+            if car.time > bestNeighbourRouteTime:
+                car.route = bestNeighbour
+                car.time = bestNeighbourRouteTime
             neighbours = getNeighbours(car.route)
             bestNeighbour, bestNeighbourRouteTime = getBestNeighbour(neighbours,est,dis)
             #print(car.time/3600)
