@@ -156,5 +156,5 @@ if __name__ == '__main__':
         if car.time > b:
             b = car.time
         #print(car.id)
-    print(b/3600-9)
+    print(b/3600)
     
