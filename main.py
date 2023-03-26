@@ -3,9 +3,11 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import math
-import sys
+import random
+import operator
 from file_reader import FileReader
 from car import Car
+from fitness import Fitness
 INF = 2 ** 24
 
 def print_hi(name):
@@ -25,6 +27,7 @@ def waitingTime(car_time, opening_hours):
         if opening_hours[i] == 1:
             return (i + next_day)*3600
     return INF
+
 def randomSolution(cars, est, distances):
     cities = list(range(len(est)))
 
@@ -62,11 +65,36 @@ def routeTime(solution,est,distances):
         #print("-----------------")
     return routeTime
 
+
+def createRoute(cityList):
+    route = random.sample(cityList, len(cityList))
+    return route
+
+def initialPopulation(popSize, cityList):
+    population = []
+
+    for i in range(0, popSize):
+        population.append(createRoute(cityList))
+    return population
+
+def rankRoutes(population):
+    fitnessResults = {}
+    for i in range(0,len(population)):
+        fitnessResults[i] = Fitness(population[i]).routeFitness()
+    return sorted(fitnessResults.items(), key = operator.itemgetter(1), reverse = True)
+
+
+
+def genetic(cars, est, dis):
+    randomSolution(cars, est, dis)
+    #for car in cars:
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     establishments = FileReader.get_establishments()
     distances = FileReader.get_distances()
 
     cars = [Car(x) for x in range(100)]
+
     
 
