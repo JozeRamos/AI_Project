@@ -3,6 +3,9 @@
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import math
+import pandas as pdb
+import numpy as np
+import matplotlib.pyplot as plt
 import random
 import operator
 from file_reader import FileReader
@@ -83,7 +86,28 @@ def rankRoutes(population):
         fitnessResults[i] = Fitness(population[i]).routeFitness()
     return sorted(fitnessResults.items(), key = operator.itemgetter(1), reverse = True)
 
+def selection(popRanked, eliteSize):
+    selectionResults = []
+    df = pdb.DataFrame(np.array(popRanked), columns=["Index","Fitness"])
+    df['cum_sum'] = df.Fitness.cumsum()
+    df['cum_perc'] = 100*df.cum_sum/df.Fitness.sum()
+    
+    for i in range(0, eliteSize):
+        selectionResults.append(popRanked[i][0])
+    for i in range(0, len(popRanked) - eliteSize):
+        pick = 100*random.random()
+        for i in range(0, len(popRanked)):
+            if pick <= df.iat[i,3]:
+                selectionResults.append(popRanked[i][0])
+                break
+    return selectionResults
 
+def matingPool(population, selectionResults):
+    matingpool = []
+    for i in range(0, len(selectionResults)):
+        index = selectionResults[i]
+        matingpool.append(population[index])
+    return matingpool
 
 def genetic(cars, est, dis):
     randomSolution(cars, est, dis)
@@ -96,6 +120,14 @@ if __name__ == '__main__':
     distances = FileReader.get_distances()
 
     cars = [Car(x) for x in range(100)]
+
+    genetic(cars, establishments, distances)
+
+    b = 0
+    for car in cars:
+        if b < car.time:
+            b = car.time
+    print(b/3600)
 
     
 
