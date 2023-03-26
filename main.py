@@ -59,7 +59,7 @@ def routeTime(solution,est,distances):
         #print(inspect)
         dist = float(distances[a][int(est[i].id)])
         #print(dist)
-        wait = waitingTime(routeTime + float(distances[a][int(est[i].id)]), est[i].opening_hours)
+        wait = waitingTime(routeTime + dist + 9 * 3600, est[i].opening_hours)
         #print(wait)
         routeTime += inspect + dist + wait
         #print("-----------------")
@@ -87,7 +87,8 @@ def rankRoutes(population):
 
 def genetic(cars, est, dis):
     randomSolution(cars, est, dis)
-    #for car in cars:
+    for car in cars:
+        fit = [Fitness(car.route,car.id, car.time)]
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
