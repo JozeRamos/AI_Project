@@ -59,7 +59,7 @@ def routeTime(solution,est,distances):
         #print(inspect)
         dist = float(distances[a][int(est[i].id)])
         #print(dist)
-        wait = waitingTime(routeTime + float(distances[a][int(est[i].id)]), est[i].opening_hours)
+        wait = waitingTime(routeTime + dist + 9 * 3600, est[i].opening_hours)
         #print(wait)
         routeTime += inspect + dist + wait
         #print("-----------------")
