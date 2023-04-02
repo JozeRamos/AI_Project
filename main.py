@@ -88,8 +88,8 @@ def getBestNeighbour(neighbours,est,dis):
     return bestNeighbour, bestRouteTime
 
 def hillClimb(cars, est, dis):
-    #randomSolution(cars,est, dis)
-    greedy(cars,est,dis)
+    randomSolution(cars,est, dis)
+    #greedy(cars,est,dis)
     # b = cars[0].time
     # for car in cars:
     #     print(car.route)
@@ -152,7 +152,7 @@ if __name__ == '__main__':
     b = cars[0].time
     for car in cars:
         print(car.route)
-        print(car.time/3600-9)
+        print(car.time/3600)
         if car.time > b:
             b = car.time
         #print(car.id)
