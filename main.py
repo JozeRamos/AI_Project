@@ -13,9 +13,8 @@ from car import Car
 from fitness import Fitness
 INF = 2 ** 24
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+establishments = FileReader.get_establishments()
+distances = FileReader.get_distances()
 
 def waitingTime(car_time, opening_hours):
     a = math.ceil(car_time/3600)
@@ -31,18 +30,21 @@ def waitingTime(car_time, opening_hours):
             return (i + next_day)*3600
     return INF
 
-def randomSolution(cars, est, distances):
-    cities = list(range(len(est)))
+def randomSolution(cars):
+    cities = list(range(len(establishments)))
 
-    for i in range(len(est)):        
+    for i in range(len(establishments)):        
         for car in cars:
             randomCity = cities[random.randint(0, len(cities) - 1)]
-            time = float(est[randomCity].inspec_duration) + float(distances[car.place][int(est[randomCity].id)]) + waitingTime(car.time + float(distances[car.place][int(est[randomCity].id)]), est[randomCity].opening_hours)
+            inspect = float(establishments[randomCity].inspec_duration)
+            dist = float(distances[car.place][int(establishments[randomCity].id)])
+            wait = waitingTime(car.time + float(distances[car.place][int(establishments[randomCity].id)]), establishments[randomCity].opening_hours)
+            time = inspect + dist + wait
             #print(time)
-            car.place = est[randomCity].id
-            est[randomCity].visited = True
+            car.place = establishments[randomCity].id
+            establishments[randomCity].visited = True
             car.time += time
-            car.route.append(est[randomCity].id)
+            car.route.append(establishments[randomCity].id)
             cities.remove(randomCity)
             if len(cities) == 0:
                 break
@@ -53,16 +55,16 @@ def randomSolution(cars, est, distances):
     #     print(car.time/3600)        
     return
 
-def routeTime(solution,est,distances):
+def routeTime(solution):
     routeTime = 0
     for k in range(len(solution)-1):
         a = solution[k]
         i = solution[k+1]
-        inspect = float(est[i].inspec_duration)
+        inspect = float(establishments[i].inspec_duration)
         #print(inspect)
-        dist = float(distances[a][int(est[i].id)])
+        dist = float(distances[a][int(establishments[i].id)])
         #print(dist)
-        wait = waitingTime(routeTime + dist + 9 * 3600, est[i].opening_hours)
+        wait = waitingTime(routeTime + dist + 9 * 3600, establishments[i].opening_hours)
         #print(wait)
         routeTime += inspect + dist + wait
         #print("-----------------")
@@ -83,7 +85,7 @@ def initialPopulation(popSize, cityList):
 def rankRoutes(population):
     fitnessResults = {}
     for i in range(0,len(population)):
-        fitnessResults[i] = Fitness(population[i]).routeFitness()
+        fitnessResults[i] = Fitness(population[i],routeTime(population[i])).routeFitness()
     return sorted(fitnessResults.items(), key = operator.itemgetter(1), reverse = True)
 
 def selection(popRanked, eliteSize):
@@ -109,25 +111,99 @@ def matingPool(population, selectionResults):
         matingpool.append(population[index])
     return matingpool
 
-def genetic(cars, est, dis):
-    randomSolution(cars, est, dis)
+def breed(parent1, parent2):
+    child = []
+    childP1 = []
+    childP2 = []
+    
+    geneA = int(random.random() * len(parent1))
+    geneB = int(random.random() * len(parent1))
+    
+    startGene = min(geneA, geneB)
+    endGene = max(geneA, geneB)
+
+    for i in range(startGene, endGene):
+        childP1.append(parent1[i])
+        
+    childP2 = [item for item in parent2 if item not in childP1]
+
+    child = childP1 + childP2
+    return child
+
+def breedPopulation(matingpool, eliteSize):
+    children = []
+    length = len(matingpool) - eliteSize
+    pool = random.sample(matingpool, len(matingpool))
+
+    for i in range(0,eliteSize):
+        children.append(matingpool[i])
+    
+    for i in range(0, length):
+        child = breed(pool[i], pool[len(matingpool)-i-1])
+        children.append(child)
+    return children
+
+def mutate(individual, mutationRate):
+    for swapped in range(len(individual)):
+        if(random.random() < mutationRate):
+            swapWith = int(random.random() * len(individual))
+            
+            city1 = individual[swapped]
+            city2 = individual[swapWith]
+            
+            individual[swapped] = city2
+            individual[swapWith] = city1
+    return individual
+
+def mutatePopulation(population, mutationRate):
+    mutatedPop = []
+    
+    for ind in range(0, len(population)):
+        mutatedInd = mutate(population[ind], mutationRate)
+        mutatedPop.append(mutatedInd)
+    return mutatedPop
+
+def nextGeneration(currentGen, eliteSize, mutationRate):
+    popRanked = rankRoutes(currentGen)
+    selectionResults = selection(popRanked, eliteSize)
+    matingpool = matingPool(currentGen, selectionResults)
+    children = breedPopulation(matingpool, eliteSize)
+    nextGeneration = mutatePopulation(children, mutationRate)
+    return nextGeneration
+
+def genetic(cars, popSize, eliteSize, mutationRate, generations):
+
+    randomSolution(cars)
+    b = 0
     for car in cars:
-        fit = [Fitness(car.route,car.id, car.time)]
+        if b < car.time:
+            b = car.time
+    print("Initial time: " + str(b/3600-9))
+
+    for car in cars:
+        #print(car.time/3600-9)
+        pop = initialPopulation(popSize, car.route)
+        for i in range(0, generations):
+            pop = nextGeneration(pop, eliteSize, mutationRate)
+        time = 1 / rankRoutes(pop)[0][1]
+        bestRouteIndex = rankRoutes(pop)[0][0]
+        car.route = pop[bestRouteIndex]
+        car.time = time
+        
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    establishments = FileReader.get_establishments()
-    distances = FileReader.get_distances()
+    
 
     cars = [Car(x) for x in range(100)]
 
-    genetic(cars, establishments, distances)
+    genetic(cars, 100, 20, 0.01, 500)
 
     b = 0
     for car in cars:
         if b < car.time:
             b = car.time
-    print(b/3600)
+    print("Final time: " + str(b/3600))
 
     
 
