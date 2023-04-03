@@ -174,6 +174,7 @@ def nextGeneration(currentGen, eliteSize, mutationRate):
 def genetic(cars, popSize, eliteSize, mutationRate, generations):
 
     randomSolution(cars)
+    #greedy(cars)
     b = 0
     for car in cars:
         if b < car.time:
@@ -189,7 +190,27 @@ def genetic(cars, popSize, eliteSize, mutationRate, generations):
         bestRouteIndex = rankRoutes(pop)[0][0]
         car.route = pop[bestRouteIndex]
         car.time = time
-        
+
+def greedy(cars):
+    for i in range(11):
+        for car in cars:   
+            min_time = INF
+            flag = False
+            for estab in establishments:               
+                if estab.visited or (estab.id == car.place): continue
+                time = float(estab.inspec_duration) + float(distances[car.place][int(estab.id)]) + waitingTime(car.time + float(distances[car.place][int(estab.id)]), estab.opening_hours)
+                if(time < min_time):
+                     min_time = round(time,2)
+                     next_hop = estab
+                     flag = True
+            if not flag:
+                 continue
+            #print(f'car with id {car.id} in place {car.place} going to {next_hop.id} with {min_time} second, or {round(min_time/3600,2)}h with fulltime {car.time/3600}')
+            car.place = next_hop.id
+
+            next_hop.visited = True
+            car.time = min_time + car.time
+            car.route.append(next_hop.id)    
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
