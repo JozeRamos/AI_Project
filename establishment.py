@@ -15,6 +15,9 @@ class Establishment:
         self.inspec_duration = inspec_duration * 60 #transform to seconds
         self.inspec_utility = inspec_utility
         self.opening_hours = opening_hours
-        self.visited = False
+        if id == 0:
+            self.visited = True
+        else:
+            self.visited = False
 
     #inspec duration + travel time + getWaitingTime()

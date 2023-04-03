@@ -357,7 +357,8 @@ if __name__ == '__main__':
         print("0) exit")
         choice = input()
         for est in establishments:
-            est.visited = False
+            if est.id != 0:
+                est.visited = False
         if choice == '1':
             hillClimb(cars,1)
         elif choice == '2':
