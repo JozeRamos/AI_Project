@@ -37,7 +37,7 @@ def waitingTime(car_time, opening_hours):
 def randomSolution(cars):
     cities = list(range(len(establishments)))
 
-    for i in range(len(establishments)):        
+    for i in range(10):        
         for car in cars:
             randomCity = cities[random.randint(0, len(cities) - 1)]
             inspect = float(establishments[randomCity].inspec_duration)
@@ -312,8 +312,8 @@ if __name__ == '__main__':
 
         b = cars[0].time
         for car in cars:
-            print(car.route)
-            print(car.time/3600)
+            # print(car.route)
+            # print(car.time/3600)
             if car.time > b:
                 b = car.time
             car.reset()
