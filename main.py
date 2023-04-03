@@ -335,6 +335,9 @@ def simulated_annealing(cars, is_random, initial_temperature=100, cooling_rate=0
 
         # Decrease the temperature according to the cooling rate
         temperature *= 1 - cooling_rate
+
+    for car in cars:
+        car.time = routeTime(car.route)
 #------------    SIMULATED ANNEALING    ------------#
 
 
