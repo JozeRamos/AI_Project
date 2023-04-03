@@ -263,7 +263,7 @@ def genetic(cars, popSize, eliteSize, mutationRate, generations,choice):
 #------------    GREEDY    ------------#
 # Does the greedy algorithm for all car routes
 def greedy(cars):
-    for i in range(11):
+    for i in range(10):
         for car in cars:  
             min_time = INF
             flag = False
