@@ -1,19 +1,12 @@
-
-# This is a sample Python script.
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
-import inspect
 import math
-import random
 import pandas as pdb
 import numpy as np
-import matplotlib.pyplot as plt
 import random
 import operator
 from file_reader import FileReader
 from car import Car
 from fitness import Fitness
-INF = 2 ** 24
+INF = float('inf')
 
 establishments = FileReader.get_establishments()
 distances = FileReader.get_distances()
@@ -284,15 +277,80 @@ def greedy(cars):
 
 #------------    GREEDY    ------------#
 
+#------------    SIMULATED ANNEALING    ------------#
+def simulated_annealing(cars, is_random, initial_temperature=100, cooling_rate=0.001):
+    # Set initial solution
+    if is_random:
+        randomSolution(cars)
+    else:
+        greedy(cars)
+
+    # Worse time
+    b = cars[0].time
+    for car in cars:
+        if car.time > b:
+            b = car.time
+    print("Initial time:", b / 3600)
+
+    # Perform the annealing process
+    current_solution = cars
+    max_routes_time = max(map(lambda car: routeTime(car.route), current_solution))
+    temperature = initial_temperature
+
+    while temperature > 0.1:
+        # Choose two random establishments and swap their assigned vehicles
+        car1 = random.choice(cars)
+        car2 = random.choice(cars)
+
+        while car1 == car2:
+            car2 = random.choice(cars)
+
+        establishment1_id = random.choice(car1.route)
+        establishment2_id = random.choice(car2.route)
+        establishment1_index = car1.route.index(establishment1_id)
+        establishment2_index = car2.route.index(establishment2_id)
+        car1.route.remove(establishment1_id)
+        car2.route.remove(establishment2_id)
+        car1.route.insert(establishment1_index, establishment2_id)
+        car2.route.insert(establishment2_index, establishment1_id)
+
+        # Calculate the energy difference between the proposed solution and the current solution
+        proposed_max_routes_time = max(map(lambda car: routeTime(car.route), current_solution))
+        #print("proposed", proposed_max_routes_time / 3600)
+        energy_diff = proposed_max_routes_time - max_routes_time
+
+        # Determine whether to accept the proposed solution
+        if energy_diff < 0:
+            max_routes_time = proposed_max_routes_time
+        else:
+            acceptance_probability = math.exp(-energy_diff / temperature)
+            if random.random() < acceptance_probability:
+                max_routes_time = proposed_max_routes_time
+            else:
+                # Revert to the previous assignments
+                car1.route.remove(establishment2_id)
+                car2.route.remove(establishment1_id)
+                car1.route.insert(establishment1_index, establishment1_id)
+                car2.route.insert(establishment2_index, establishment2_id)
+
+        # Decrease the temperature according to the cooling rate
+        temperature *= 1 - cooling_rate
+#------------    SIMULATED ANNEALING    ------------#
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     cars = [Car(x) for x in range(100)]
+    num_establishments = len(establishments)
+    num_cars = len(cars)
 
     while True:
         print("1) HILL CLIMB RANDOM")
         print("2) HILL CLIMB GREEDY")
         print("3) GENETIC RANDOM")
         print("4) GENETIC GREEDY")
+        print("5) SIMULATED ANNEALING RANDOM")
+        print("6) SIMULATED ANNEALING GREEDY")
         print("0) exit")
         choice = input()
         for est in establishments:
@@ -305,6 +363,10 @@ if __name__ == '__main__':
             genetic(cars, 100, 20, 0.01, 500,1)
         elif choice == '4':
             genetic(cars, 100, 20, 0.01, 500,0)
+        elif choice == '5':
+            simulated_annealing(cars, 1)
+        elif choice == '6':
+            simulated_annealing(cars, 0)
         elif choice == '0':
             break
         else:
