@@ -125,10 +125,12 @@ def hillClimb(cars, choice):
 
 #-----------   GENETIC ALGO   -----------#
 
+#creates a random route
 def createRoute(cityList):
     route = random.sample(cityList, len(cityList))
     return route
 
+#creates the initial population
 def initialPopulation(popSize, cityList):
     population = []
 
@@ -136,12 +138,14 @@ def initialPopulation(popSize, cityList):
         population.append(createRoute(cityList))
     return population
 
+#returns a sorted list with the best routes
 def rankRoutes(population):
     fitnessResults = {}
     for i in range(0,len(population)):
         fitnessResults[i] = Fitness(population[i],routeTime(population[i])).routeFitness()
     return sorted(fitnessResults.items(), key = operator.itemgetter(1), reverse = True)
 
+#returns the best results to form the mating pool
 def selection(popRanked, eliteSize):
     selectionResults = []
     df = pdb.DataFrame(np.array(popRanked), columns=["Index","Fitness"])
@@ -158,6 +162,7 @@ def selection(popRanked, eliteSize):
                 break
     return selectionResults
 
+#creates a mating pool for the population
 def matingPool(population, selectionResults):
     matingpool = []
     for i in range(0, len(selectionResults)):
@@ -165,6 +170,7 @@ def matingPool(population, selectionResults):
         matingpool.append(population[index])
     return matingpool
 
+#Breeds two parents together to form a child
 def breed(parent1, parent2):
     child = []
     childP1 = []
@@ -184,6 +190,7 @@ def breed(parent1, parent2):
     child = childP1 + childP2
     return child
 
+#Creates the next generation with crossover
 def breedPopulation(matingpool, eliteSize):
     children = []
     length = len(matingpool) - eliteSize
@@ -197,6 +204,7 @@ def breedPopulation(matingpool, eliteSize):
         children.append(child)
     return children
 
+#returns a mutated individual
 def mutate(individual, mutationRate):
     for swapped in range(len(individual)):
         if(random.random() < mutationRate):
@@ -209,6 +217,7 @@ def mutate(individual, mutationRate):
             individual[swapWith] = city1
     return individual
 
+#returns a mutated population to help avoid local convergence
 def mutatePopulation(population, mutationRate):
     mutatedPop = []
     
@@ -217,6 +226,7 @@ def mutatePopulation(population, mutationRate):
         mutatedPop.append(mutatedInd)
     return mutatedPop
 
+#Return the Next Generation by putting all the pieces together
 def nextGeneration(currentGen, eliteSize, mutationRate):
     popRanked = rankRoutes(currentGen)
     selectionResults = selection(popRanked, eliteSize)
@@ -225,6 +235,7 @@ def nextGeneration(currentGen, eliteSize, mutationRate):
     nextGeneration = mutatePopulation(children, mutationRate)
     return nextGeneration
 
+#Does the genetic algorithm
 def genetic(cars, popSize, eliteSize, mutationRate, generations,choice):
     if choice:
         randomSolution(cars)
