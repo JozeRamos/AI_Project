@@ -383,7 +383,7 @@ def get_tabu_neighbors(solution, size, tabu_history):
             k = random.randrange(len(changeableSolution[i]))
             l = random.randrange(len(changeableSolution[j]))
 
-            while((i,k,j,l) in insertedSet):
+            while((i,k,j,l) in insertedSet or changeableSolution[i][k] == 0 or changeableSolution[j][l] == 0):
                 k = random.randrange(len(changeableSolution[i]))
                 l = random.randrange(len(changeableSolution[j]))
             insertedSet.add((i,k,j,l))
@@ -407,7 +407,7 @@ def get_tabu_neighbors(solution, size, tabu_history):
             k = random.randrange(len(changeableSolution[i]))
             l = random.randrange(len(changeableSolution[j]))
 
-            while((i,k,j,l) in swapSet):
+            while((i,k,j,l) in swapSet or changeableSolution[i][k] == 0 or changeableSolution[j][l] == 0):
                 k = random.randrange(len(changeableSolution[i]))
                 l = random.randrange(len(changeableSolution[j]))
             swapSet.add((i,k,j,l))
@@ -459,7 +459,7 @@ def tabu_search(cars, is_random):
     for car in cars:
         if b < car.time:
             b = car.time
-    print("Initial time: " + str(b/3600-9))
+    print("Initial time: " + str(b/3600))
 
     current_solution = getSolutionList(cars)
 
