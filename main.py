@@ -341,6 +341,9 @@ def simulated_annealing(cars, is_random, initial_temperature=100, cooling_rate=0
         car.time = routeTime(car.route)
 #------------    SIMULATED ANNEALING    ------------#
 
+#------------        TABU SEARCH        ------------#
+
+#Get the list of routes (ids) sorted by their time and its route. The worst route will be on index 0
 def getSortedRouts(best_solution):
     sol = list(enumerate(best_solution))
     sol = sorted(sol, key= lambda x : routeTime(x[1]))
@@ -354,8 +357,8 @@ def getSortedRouts(best_solution):
         sorted_solution.append(sol[i][1])
     return list(reversed(res)), list(reversed(sorted_solution))
 
+#Returns the best neighbour for the current solution.
 def get_tabu_neighbors(solution, size, tabu_history):
-    # Generate a set of new solutions by swapping customers or inserting customers
     num_neighbors = 100
 
     best_neighbor = solution
@@ -363,10 +366,14 @@ def get_tabu_neighbors(solution, size, tabu_history):
 
     changeableSolution = deepcopy(solution)
 
+    #this sets are to make sure we are not testing 
     insertedSet = set()
     swapSet = set()
 
+    #get the sorted list of solutions so we can work on improving the worst route
     lista, changeableSolution = getSortedRouts(changeableSolution)
+
+    #The neighbours are found by insertions and swaps on the routes
     for _ in range(num_neighbors):
         i = random.sample(lista[:1],1)[0]
         j = random.sample(lista[len(lista)-size//2:],1)[0]
@@ -384,6 +391,8 @@ def get_tabu_neighbors(solution, size, tabu_history):
             changeableSolution[i] = [ele for ele in changeableSolution[i] if ele != customer]
             changeableSolution[j].insert(l, customer)
             neighbor_cost = evaluate_route_cost(changeableSolution)
+
+            #check if solution is better than current one and is not on tabu history
             if tupleize(changeableSolution) not in tabu_history and neighbor_cost < best_neighbor_cost:
                 best_neighbor_cost = neighbor_cost
                 best_neighbor = deepcopy(changeableSolution)
@@ -404,6 +413,8 @@ def get_tabu_neighbors(solution, size, tabu_history):
             swapSet.add((i,k,j,l))
             changeableSolution[i][k], changeableSolution[j][l] = changeableSolution[j][l], changeableSolution[i][k]
             neighbor_cost = evaluate_route_cost(changeableSolution)
+
+            #check if solution is better than current one and is not on tabu history
             if tupleize(changeableSolution) not in tabu_history and neighbor_cost < best_neighbor_cost:
                 best_neighbor_cost = neighbor_cost
                 best_neighbor = deepcopy(changeableSolution)
@@ -415,6 +426,7 @@ def tupleize(solution):
     # Convert each route to a tuple and return a tuple of tuples
     return tuple(tuple(route) for route in solution)
 
+#get the list of routes
 def getSolutionList(cars):
     solution = []
     for car in cars:
@@ -432,6 +444,7 @@ def evaluate_route_cost(routes):
             min_time = time
     return min_time
 
+#Performs the tabu search
 def tabu_search(cars, is_random):
     tabu_history = {}
     num_iterations = 1000
@@ -441,6 +454,7 @@ def tabu_search(cars, is_random):
         randomSolution(cars)
     else:
         greedy(cars)
+
     current_solution = getSolutionList(cars)
 
     best_solution_cost = evaluate_route_cost(current_solution)
@@ -448,6 +462,7 @@ def tabu_search(cars, is_random):
 
     tabu_history[tupleize(current_solution)] = tabu_limit
     for _ in range(num_iterations):
+        #decrease the tabu limit on the tabu history
         for x in tabu_history:
             tabu_history[x] -= 1
         tabu_history = {x: tabu_history[x] for x in tabu_history if tabu_history[x] > 0}
@@ -466,7 +481,7 @@ def tabu_search(cars, is_random):
     for i in range(len(cars)):
         cars[i].route = best_solution[i]
         cars[i].time = routeTime(best_solution[i])
-
+#------------        TABU SEARCH        ------------#
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
