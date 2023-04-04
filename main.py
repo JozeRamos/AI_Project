@@ -487,7 +487,7 @@ def tabu_search(cars, is_random):
     for i in range(len(cars)):
         cars[i].route = best_solution[i]
         cars[i].time = routeTime(best_solution[i])
-        
+
 #------------        TABU SEARCH        ------------#
 
 # Press the green button in the gutter to run the script.
@@ -505,6 +505,7 @@ if __name__ == '__main__':
         print("6) SIMULATED ANNEALING GREEDY")
         print("7) TABU SEARCH RANDOM")
         print("8) TABU SEARCH GREEDY")
+        print("9) CUSTOM SIMULATED ANNEALING GREEDY")
         print("0) exit")
         choice = input()
         for establishment in establishments:
@@ -526,6 +527,23 @@ if __name__ == '__main__':
             tabu_search(cars, 1)
         elif choice == '8':
             tabu_search(cars, 0)
+        elif choice == '9':
+            popSize = 0
+            while(popSize < 2):
+                popSize = int(input("Population size? (Must be bigger than 1)"))
+            eliteSize = 0
+            while(eliteSize >= popSize or eliteSize < 1):
+                eliteSize = int(input("Elite size? (Must be bigger than 1 and smaller than population size)"))
+            mutationRate = 0.0
+            while(mutationRate >= 1.0 or mutationRate <= 0.0):
+                mutationRate = float(input("Mutation Rate? (Must be beetween 0.0 and 1.0)"))
+            generations = 0
+            while(generations < 1):
+                generations = int(input("How many generations? (Must be bigger than 0)"))
+            isRandom = 3
+            while(isRandom != 0 and isRandom != 1):
+                isRandom = int(input("Random initialization? (1 yes/0 no)"))
+            genetic(cars, popSize, eliteSize, mutationRate, generations,isRandom)
         elif choice == '0':
             break
         else:
