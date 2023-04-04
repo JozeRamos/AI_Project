@@ -32,7 +32,7 @@ def randomSolution(cars):
 
     for i in range(10):        
         for car in cars:
-            randomCity = cities[random.randint(0, len(cities) - 1)]
+            randomCity = cities[random.randint(1, len(cities) - 1)]
             inspect = float(establishments[randomCity].inspec_duration)
             dist = float(distances[car.place][int(establishments[randomCity].id)])
             wait = waitingTime(car.time + float(distances[car.place][int(establishments[randomCity].id)]), establishments[randomCity].opening_hours)
@@ -42,9 +42,9 @@ def randomSolution(cars):
             car.time += time
             car.route.append(establishments[randomCity].id)
             cities.remove(randomCity)
-            if len(cities) == 0:
+            if len(cities) == 1:
                 break
-        if len(cities) == 0:
+        if len(cities) == 1:
             break
 
 #gives the time of a route
@@ -78,7 +78,7 @@ def getBestNeighbour(neighbours):
     bestRouteTime = routeTime(neighbours[0])
     bestNeighbour = neighbours[0]
     for neighbour in neighbours:
-        currentRouteTime = routeTime(neighbour)
+        currentRouteTime = routeTime([0] + neighbour)
         if currentRouteTime < bestRouteTime:
             bestRouteTime = currentRouteTime
             bestNeighbour = neighbour
@@ -96,8 +96,8 @@ def hillClimb(cars, choice):
             b = car.time
     print("Initial time: " + str(b/3600))
     for car in cars:
-        car.time = routeTime(car.route)
-        neighbours = getNeighbours(car.route)
+        car.time = routeTime(car.route[1:])
+        neighbours = getNeighbours(car.route[1:])
         bestNeighbour, bestNeighbourRouteTime = getBestNeighbour(neighbours)
         temp = 0
         for i in range(700):
@@ -106,7 +106,7 @@ def hillClimb(cars, choice):
                 break
             if car.time > bestNeighbourRouteTime:
                 temp = 0
-                car.route = bestNeighbour
+                car.route = [0] + bestNeighbour
                 car.time = bestNeighbourRouteTime
             neighbours = getNeighbours(bestNeighbour)
             bestNeighbour, bestNeighbourRouteTime = getBestNeighbour(neighbours)
@@ -135,7 +135,7 @@ def initialPopulation(popSize, cityList):
 def rankRoutes(population):
     fitnessResults = {}
     for i in range(0,len(population)):
-        fitnessResults[i] = Fitness(population[i],routeTime(population[i])).routeFitness()
+        fitnessResults[i] = Fitness(population[i],routeTime([0] + population[i])).routeFitness()
     return sorted(fitnessResults.items(), key = operator.itemgetter(1), reverse = True)
 
 #returns the best results to form the mating pool
@@ -243,12 +243,12 @@ def genetic(cars, popSize, eliteSize, mutationRate, generations,choice):
 
     for car in cars:
         #print(car.time/3600-9)
-        pop = initialPopulation(popSize, car.route)
+        pop = initialPopulation(popSize, car.route[1:])
         for i in range(0, generations):
             pop = nextGeneration(pop, eliteSize, mutationRate)
         time = 1 / rankRoutes(pop)[0][1]
         bestRouteIndex = rankRoutes(pop)[0][0]
-        car.route = pop[bestRouteIndex]
+        car.route = [0] + pop[bestRouteIndex]
         car.time = time
 
 #-----------   GENETIC ALGO   -----------#
@@ -378,8 +378,8 @@ if __name__ == '__main__':
 
         b = cars[0].time
         for car in cars:
-            # print(car.route)
-            # print(car.time/3600)
+            print(car.route)
+            print(car.time/3600)
             if car.time > b:
                 b = car.time
             car.reset()
