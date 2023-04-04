@@ -455,6 +455,12 @@ def tabu_search(cars, is_random):
     else:
         greedy(cars)
 
+    b = 0
+    for car in cars:
+        if b < car.time:
+            b = car.time
+    print("Initial time: " + str(b/3600-9))
+
     current_solution = getSolutionList(cars)
 
     best_solution_cost = evaluate_route_cost(current_solution)
@@ -481,6 +487,7 @@ def tabu_search(cars, is_random):
     for i in range(len(cars)):
         cars[i].route = best_solution[i]
         cars[i].time = routeTime(best_solution[i])
+        
 #------------        TABU SEARCH        ------------#
 
 # Press the green button in the gutter to run the script.
