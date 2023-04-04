@@ -240,7 +240,7 @@ def genetic(cars, popSize, eliteSize, mutationRate, generations,choice):
     for car in cars:
         if b < car.time:
             b = car.time
-    print("Initial time: " + str(b/3600-9))
+    print("Initial time: " + str(b/3600))
 
     for car in cars:
         #print(car.time/3600-9)
