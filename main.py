@@ -306,8 +306,8 @@ def simulated_annealing(cars, is_random, initial_temperature=100, cooling_rate=0
         while car1 == car2:
             car2 = random.choice(cars)
 
-        establishment1_id = random.choice(car1.route)
-        establishment2_id = random.choice(car2.route)
+        establishment1_id = car1.route[random.randint(1, len(car1.route) - 1)]
+        establishment2_id = car2.route[random.randint(1, len(car2.route) - 1)]
         establishment1_index = car1.route.index(establishment1_id)
         establishment2_index = car2.route.index(establishment2_id)
         car1.route.remove(establishment1_id)
@@ -490,6 +490,7 @@ if __name__ == '__main__':
     num_cars = len(cars)
 
     while True:
+        print()
         print("1) HILL CLIMB RANDOM")
         print("2) HILL CLIMB GREEDY")
         print("3) GENETIC RANDOM")
@@ -499,7 +500,7 @@ if __name__ == '__main__':
         print("7) TABU SEARCH RANDOM")
         print("8) TABU SEARCH GREEDY")
         print("0) exit")
-        choice = input()
+        choice = input("Select one of the values ​​above: ")
         for establishment in establishments:
             if establishment.id != 0:
                 establishment.visited = False
