@@ -5,6 +5,7 @@ import random
 import operator
 from file_reader import FileReader
 from car import Car
+from copy import deepcopy
 from fitness import Fitness
 INF = float('inf')
 
@@ -340,6 +341,132 @@ def simulated_annealing(cars, is_random, initial_temperature=100, cooling_rate=0
         car.time = routeTime(car.route)
 #------------    SIMULATED ANNEALING    ------------#
 
+def getSortedRouts(best_solution):
+    sol = list(enumerate(best_solution))
+    sol = sorted(sol, key= lambda x : routeTime(x[1]))
+
+    res = []
+    sorted_solution = []
+    res.append(sol[0][0])
+    sorted_solution.append(sol[0][1])
+    for i in range(1,len(best_solution)):
+        res.append(sol[i][0])
+        sorted_solution.append(sol[i][1])
+    return list(reversed(res)), list(reversed(sorted_solution))
+
+def get_tabu_neighbors(solution, size, tabu_history):
+    # Generate a set of new solutions by swapping customers or inserting customers
+    num_neighbors = 100
+
+    best_neighbor = solution
+    best_neighbor_cost = INF
+
+    changeableSolution = deepcopy(solution)
+
+    insertedSet = set()
+    swapSet = set()
+
+    lista, changeableSolution = getSortedRouts(changeableSolution)
+    for _ in range(num_neighbors):
+        i = random.sample(lista[:1],1)[0]
+        j = random.sample(lista[len(lista)-size//2:],1)[0]
+
+        # Insert a customer into a different route
+        if len(changeableSolution[i]) > 0 and len(changeableSolution[j]) > 1:           
+            k = random.randrange(len(changeableSolution[i]))
+            l = random.randrange(len(changeableSolution[j]))
+
+            while((i,k,j,l) in insertedSet):
+                k = random.randrange(len(changeableSolution[i]))
+                l = random.randrange(len(changeableSolution[j]))
+            insertedSet.add((i,k,j,l))
+            customer = changeableSolution[i][k]
+            changeableSolution[i] = [ele for ele in changeableSolution[i] if ele != customer]
+            changeableSolution[j].insert(l, customer)
+            neighbor_cost = evaluate_route_cost(changeableSolution)
+            if tupleize(changeableSolution) not in tabu_history and neighbor_cost < best_neighbor_cost:
+                best_neighbor_cost = neighbor_cost
+                best_neighbor = deepcopy(changeableSolution)
+            changeableSolution[j].remove(customer)
+            changeableSolution[i].insert(k, customer)
+
+        i = random.sample(lista[:1],1)[0]
+        j = random.sample(lista[1:],1)[0]
+
+        # Swap customers between two routes
+        if len(changeableSolution[i]) > 0 and len(changeableSolution[j]) > 0:
+            k = random.randrange(len(changeableSolution[i]))
+            l = random.randrange(len(changeableSolution[j]))
+
+            while((i,k,j,l) in swapSet):
+                k = random.randrange(len(changeableSolution[i]))
+                l = random.randrange(len(changeableSolution[j]))
+            swapSet.add((i,k,j,l))
+            changeableSolution[i][k], changeableSolution[j][l] = changeableSolution[j][l], changeableSolution[i][k]
+            neighbor_cost = evaluate_route_cost(changeableSolution)
+            if tupleize(changeableSolution) not in tabu_history and neighbor_cost < best_neighbor_cost:
+                best_neighbor_cost = neighbor_cost
+                best_neighbor = deepcopy(changeableSolution)
+            changeableSolution[i][k], changeableSolution[j][l] = changeableSolution[j][l], changeableSolution[i][k]
+    
+    return best_neighbor
+
+def tupleize(solution):
+    # Convert each route to a tuple and return a tuple of tuples
+    return tuple(tuple(route) for route in solution)
+
+def getSolutionList(cars):
+    solution = []
+    for car in cars:
+        solution.append(car.route)
+
+    return solution
+
+def evaluate_route_cost(routes):
+    min_time = -1
+
+    for route in routes:
+        time = routeTime(route)
+
+        if(time > min_time):
+            min_time = time
+    return min_time
+
+def tabu_search(cars, is_random):
+    tabu_history = {}
+    num_iterations = 1000
+    tabu_limit = 10
+    
+    if(is_random):
+        randomSolution(cars)
+    else:
+        greedy(cars)
+    current_solution = getSolutionList(cars)
+
+    best_solution_cost = evaluate_route_cost(current_solution)
+    best_solution = current_solution
+
+    tabu_history[tupleize(current_solution)] = tabu_limit
+    for _ in range(num_iterations):
+        for x in tabu_history:
+            tabu_history[x] -= 1
+        tabu_history = {x: tabu_history[x] for x in tabu_history if tabu_history[x] > 0}
+        best_neighbor = get_tabu_neighbors(current_solution, len(establishments), tabu_history)
+        
+        current_solution = best_neighbor
+
+        tabu_history[tupleize(best_neighbor)] = tabu_limit
+
+        route_cost = evaluate_route_cost(best_neighbor)
+        if(route_cost < best_solution_cost):           
+            best_solution_cost = route_cost
+            best_solution = best_neighbor
+            
+
+    for i in range(len(cars)):
+        cars[i].route = best_solution[i]
+        cars[i].time = routeTime(best_solution[i])
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
@@ -354,11 +481,13 @@ if __name__ == '__main__':
         print("4) GENETIC GREEDY")
         print("5) SIMULATED ANNEALING RANDOM")
         print("6) SIMULATED ANNEALING GREEDY")
+        print("7) TABU SEARCH RANDOM")
+        print("8) TABU SEARCH GREEDY")
         print("0) exit")
         choice = input()
-        for est in establishments:
-            if est.id != 0:
-                est.visited = False
+        for establishment in establishments:
+            if establishment.id != 0:
+                establishment.visited = False
         if choice == '1':
             hillClimb(cars,1)
         elif choice == '2':
@@ -371,6 +500,10 @@ if __name__ == '__main__':
             simulated_annealing(cars, 1)
         elif choice == '6':
             simulated_annealing(cars, 0)
+        elif choice == '7':
+            tabu_search(cars, 1)
+        elif choice == '8':
+            tabu_search(cars, 0)
         elif choice == '0':
             break
         else:
@@ -384,3 +517,4 @@ if __name__ == '__main__':
                 b = car.time
             car.reset()
         print("Final time: " + str(b/3600))
+    
