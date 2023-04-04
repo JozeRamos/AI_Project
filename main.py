@@ -97,7 +97,7 @@ def hillClimb(cars, choice):
             b = car.time
     print("Initial time: " + str(b/3600))
     for car in cars:
-        car.time = routeTime(car.route[1:])
+        car.time = routeTime(car.route)
         neighbours = getNeighbours(car.route[1:])
         bestNeighbour, bestNeighbourRouteTime = getBestNeighbour(neighbours)
         temp = 0
@@ -506,7 +506,7 @@ if __name__ == '__main__':
         print("6) SIMULATED ANNEALING GREEDY")
         print("7) TABU SEARCH RANDOM")
         print("8) TABU SEARCH GREEDY")
-        print("9) CUSTOM GENETIC GREEDY")
+        print("9) CUSTOM GENETIC")
         print("0) exit")
         choice = input("Select one of the values ​​above: ")
         for establishment in establishments:
