@@ -493,8 +493,6 @@ def tabu_search(cars, is_random):
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     cars = [Car(x) for x in range(100)]
-    num_establishments = len(establishments)
-    num_cars = len(cars)
 
     while True:
         print()
